@@ -27,7 +27,7 @@ if ($NumberOfWords -lt 4 -and -not $Force) {
 $NumberOfRuns = 0
 
 do {
-    $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_news_2012_1M/randomword/?limit=$Number").word
+    $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_news_2012_1M/randomword/?limit=$NumberOfWords").word
     # $RandomWords = (Invoke-RestMethod -Uri http://api.corpora.uni-leipzig.de/ws/words/deu_wikipedia_2010_1M/randomword/?limit=4).word
 
     # $RawString = $RandomWords[0] + "-" + $RandomWords[1] + "-" + $RandomWords[2] + "-" + $RandomWords[3]
