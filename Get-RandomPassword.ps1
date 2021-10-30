@@ -5,7 +5,11 @@ param (
     $NumberOfPasswords = 10,
     [Parameter()]
     [string]
-    $OutputPath = ".\Output.txt",
+    [ValidateNotNullOrEmpty()]
+    $OutputDirectory = ".\",
+    [string]
+    [ValidateNotNullOrEmpty()]
+    $OutputFilename = "Passwörter Output.txt",
     [switch]
     $OutFile,
     [ValidateNotNullOrEmpty()]
@@ -18,6 +22,12 @@ param (
     [switch]
     $Force
 )
+
+if (-not (Test-Path $OutputDirectory -PathType Container)) {
+    $OutputDirectory = ".\"
+}
+
+$OutputPath = $OutputDirectory + $OutputFilename
 
 if ($NumberOfWords -lt 4 -and -not $Force) {
     Write-Error "Number of words can't be below 4. Setting Number to minimum." -Category InvalidData
