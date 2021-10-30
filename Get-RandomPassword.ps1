@@ -1,17 +1,13 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
     [Int16]
     $NumberOfPasswords = 10,
-    [Parameter()]
     [string]
     [ValidateNotNullOrEmpty()]
     $OutputDirectory = ".\",
     [string]
     [ValidateNotNullOrEmpty()]
     $OutputFilename = "Passwörter Output.txt",
-    [switch]
-    $OutFile,
     [ValidateNotNullOrEmpty()]
     [Int16]
     $NumberOfWords = 4,
@@ -20,7 +16,11 @@ param (
     [switch]
     $AddNumber,
     [switch]
-    $Force
+    $Force,
+    [switch]
+    $UseWikipedia,
+    [switch]
+    $ReturnList
 )
 
 if (-not (Test-Path $OutputDirectory -PathType Container)) {
@@ -56,12 +56,10 @@ do {
     $NumberOfRuns++
 } while ($NumberOfRuns -lt $NumberOfPasswords)
 
-$PasswordOutput = $PasswordOutput.TrimEnd("`n")
-
-if ($OutFile) {
-    $PasswordOutput | Out-File -FilePath $OutputPath
+if ($ReturnList) {
+    return $PasswordOutput
 }
 else {
-    Write-Host $PasswordOutput
-    Read-Host "Enter zum beenden..."
+    $PasswordOutput | Out-File -FilePath $OutputPath
+    Write-Verbose $PasswordOutput
 }
