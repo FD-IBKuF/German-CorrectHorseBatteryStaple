@@ -37,10 +37,18 @@ if ($NumberOfWords -lt 4 -and -not $Force) {
 $NumberOfRuns = 0
 
 do {
-    $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_news_2012_1M/randomword/?limit=$NumberOfWords").word
-    # $RandomWords = (Invoke-RestMethod -Uri http://api.corpora.uni-leipzig.de/ws/words/deu_wikipedia_2010_1M/randomword/?limit=4).word
+    try {
+        if ($UseWikipedia) {
+            $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_wikipedia_2010_1M/randomword/?limit=$NumberOfWords").word
+        }
+        else {
+            $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_news_2012_1M/randomword/?limit=$NumberOfWords").word
+        }
+    }
+    catch {
+        Throw $_
+    }
 
-    # $RawString = $RandomWords[0] + "-" + $RandomWords[1] + "-" + $RandomWords[2] + "-" + $RandomWords[3]
     $RawString = ""
     foreach ($Word in $RandomWords) {
         $RawString += "$Word$Separator"
