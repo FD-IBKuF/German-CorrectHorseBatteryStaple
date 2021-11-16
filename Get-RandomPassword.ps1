@@ -1,13 +1,13 @@
 [CmdletBinding()]
 param (
-    [Parameter()]
     [Int16]
     $NumberOfPasswords = 10,
-    [Parameter()]
     [string]
-    $OutputPath = ".\Output.txt",
-    [switch]
-    $OutFile,
+    [ValidateNotNullOrEmpty()]
+    $OutputDirectory = ".\",
+    [string]
+    [ValidateNotNullOrEmpty()]
+    $OutputFilename = "Passwörter Output.txt",
     [ValidateNotNullOrEmpty()]
     [Int16]
     $NumberOfWords = 4,
@@ -16,8 +16,18 @@ param (
     [switch]
     $AddNumber,
     [switch]
-    $Force
+    $Force,
+    [switch]
+    $UseWikipedia,
+    [switch]
+    $ReturnList
 )
+
+if (-not (Test-Path $OutputDirectory -PathType Container)) {
+    $OutputDirectory = ".\"
+}
+
+$OutputPath = $OutputDirectory + $OutputFilename
 
 if ($NumberOfWords -lt 4 -and -not $Force) {
     Write-Error "Number of words can't be below 4. Setting Number to minimum." -Category InvalidData
@@ -28,12 +38,17 @@ $NumberOfRuns = 0
 
 do {
     try {
-
-        $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_news_2012_1M/randomword/?limit=$NumberOfWords").word
+        if ($UseWikipedia) {
+            $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_wikipedia_2010_1M/randomword/?limit=$NumberOfWords").word
+        }
+        else {
+            $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_news_2012_1M/randomword/?limit=$NumberOfWords").word
+        }
     }
     catch {
-        Throw $_.Exception
+        Throw $_
     }
+
     $RawString = ""
     foreach ($Word in $RandomWords) {
         $RawString += "$Word$Separator"
@@ -49,14 +64,10 @@ do {
     $NumberOfRuns++
 } while ($NumberOfRuns -lt $NumberOfPasswords)
 
-$PasswordOutput = $PasswordOutput.TrimEnd("`n")
-
-if ($OutFile) {
-    $PasswordOutput | Out-File -FilePath $OutputPath
+if ($ReturnList) {
+    return $PasswordOutput
 }
 else {
-    Write-Host $PasswordOutput
-    if (-not $SuppressEndMessage) {
-        Read-Host "Enter zum beenden..."
-    }
+    $PasswordOutput | Out-File -FilePath $OutputPath
+    Write-Verbose $PasswordOutput
 }
