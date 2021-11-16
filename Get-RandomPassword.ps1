@@ -20,8 +20,22 @@ param (
     [switch]
     $UseWikipedia,
     [switch]
-    $ReturnList
+    $ReturnList,
+    [switch]
+    $NoInteraction
 )
+
+if (-not $NoInteraction) {
+    $NumberOfPasswords = Read-Host "Anzahl an zu generierenden Passwörtern (Standard: 10)" -as [Int16]
+    $NumberOfWords = Read-Host "Anzahl Wörter pro Passwort" -as [int16]
+    if (-not $NumberOfWords) {
+        # Default value in case of invalid input
+        $NumberOfWords = 4
+    }
+    $NoSelector = New-Object System.Management.Automation.Host.ChoiceDescription "&Nein", ""
+    $YesSelector = New-Object System.Management.Automation.Host.ChoiceDescription "&Ja", ""
+    $AddNumber = $Host.UI.PromptForChoice("Ziffer erzwingen", "Soll das Passwort eine Ziffer beinhalten", ($NoSelector, $YesSelector), 0)
+}
 
 if (-not (Test-Path $OutputDirectory -PathType Container)) {
     $OutputDirectory = ".\"
