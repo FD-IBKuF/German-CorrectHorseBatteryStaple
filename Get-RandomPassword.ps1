@@ -27,10 +27,13 @@ if ($NumberOfWords -lt 4 -and -not $Force) {
 $NumberOfRuns = 0
 
 do {
-    $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_news_2012_1M/randomword/?limit=$NumberOfWords").word
-    # $RandomWords = (Invoke-RestMethod -Uri http://api.corpora.uni-leipzig.de/ws/words/deu_wikipedia_2010_1M/randomword/?limit=4).word
+    try {
 
-    # $RawString = $RandomWords[0] + "-" + $RandomWords[1] + "-" + $RandomWords[2] + "-" + $RandomWords[3]
+        $RandomWords = (Invoke-RestMethod -Uri "http://api.corpora.uni-leipzig.de/ws/words/deu_news_2012_1M/randomword/?limit=$NumberOfWords").word
+    }
+    catch {
+        Throw $_.Exception
+    }
     $RawString = ""
     foreach ($Word in $RandomWords) {
         $RawString += "$Word$Separator"
@@ -53,5 +56,7 @@ if ($OutFile) {
 }
 else {
     Write-Host $PasswordOutput
-    Read-Host "Enter zum beenden..."
+    if (-not $SuppressEndMessage) {
+        Read-Host "Enter zum beenden..."
+    }
 }
