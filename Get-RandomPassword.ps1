@@ -26,15 +26,13 @@ param (
 )
 
 if (-not $NoInteraction) {
-    $NumberOfPasswords = Read-Host "Anzahl an zu generierenden Passwörtern (Standard: 10)" -as [Int16]
-    $NumberOfWords = Read-Host "Anzahl Wörter pro Passwort" -as [int16]
-    if (-not $NumberOfWords) {
-        # Default value in case of invalid input
-        $NumberOfWords = 4
-    }
+    $NumberOfPasswordsInput = Read-Host "Anzahl an zu generierenden Passwörtern (Standard: 10)" # -as [Int16]
+    $NumberOfPasswords = $NumberOfPasswordsInput -as [int16]
+    $NumberOfWordsInput = Read-Host "Anzahl Wörter pro Passwort (Minimum 4)" # -as [int16]
+    $NumberOfWords = $NumberOfWordsInput -as [int16]
     $NoSelector = New-Object System.Management.Automation.Host.ChoiceDescription "&Nein", ""
     $YesSelector = New-Object System.Management.Automation.Host.ChoiceDescription "&Ja", ""
-    $AddNumber = $Host.UI.PromptForChoice("Ziffer erzwingen", "Soll das Passwort eine Ziffer beinhalten", ($NoSelector, $YesSelector), 0)
+    $AddNumber = ($Host.UI.PromptForChoice("Ziffer erzwingen", "Muss das Passwort eine Ziffer beinhalten", ($NoSelector, $YesSelector), 0)) -as [bool]
 }
 
 if (-not (Test-Path $OutputDirectory -PathType Container)) {
@@ -83,5 +81,11 @@ if ($ReturnList) {
 }
 else {
     $PasswordOutput | Out-File -FilePath $OutputPath
+    $FullPath = (Get-Item $OutputPath).FullName
+    $ExitMessage = "Die erstellten Passwörter wurden in folgender Datei abgespeichert:`n$FullPath`nSoll die Datei im Anschluss geöffnet werden?"
+    $OpenOutputFile = $Host.UI.PromptForChoice("Output Öffnen", $ExitMessage, ($NoSelector, $YesSelector), 0)
+    if ($OpenOutputFile) {
+        Invoke-Item $FullPath
+    }
     Write-Verbose $PasswordOutput
 }
